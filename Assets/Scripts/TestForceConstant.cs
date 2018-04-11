@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Experimental.Playables;
 
 public class TestForceConstant : MonoBehaviour
 {
@@ -9,7 +10,9 @@ public class TestForceConstant : MonoBehaviour
     private Rigidbody2D RB;
 
     private GameObject OtherEntity;
-	// Use this for initialization
+
+    private Color cRayColor;
+
 	void Start ()
 	{
 	    RB = GetComponent<Rigidbody2D>();
@@ -27,13 +30,38 @@ public class TestForceConstant : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-	    Vector2 TowardsOther = transform.position - OtherEntity.transform.position;
-	    TowardsOther.Normalize();
-	    RB.AddForce(TowardsOther * fConstantForce);
+	    Vector2 TowardsOther = OtherEntity.transform.position - transform.position;
+	    Vector2 AwayFromOther = -TowardsOther;
+	    RaycastHit2D hit = Physics2D.Raycast(transform.position, TowardsOther.normalized, Vector3.Distance(transform.position, OtherEntity.transform.position));
+	    Debug.DrawRay(transform.position, TowardsOther, cRayColor);
+        if (hit.collider.gameObject.CompareTag("Player"))
+        {
+            cRayColor = Color.green;
+	        RB.AddForce(AwayFromOther.normalized * fConstantForce);
+        }
+        else
+        {
+            cRayColor = Color.red;
+        }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        
-    }
+    //RaycastHit2D hit = Physics2D.Raycast(goBulletStartPosition.transform.position, Vector2.right, fRayDistance);
+    //Debug.DrawRay(goBulletStartPosition.transform.position, v3DebugRay, Color.red);
+
+    //if (hit == true
+    //&& (hit.collider.gameObject.CompareTag("Enemy") || hit.collider.gameObject.CompareTag("Wasp"))
+    //&& !BeeManager.bFormationActive
+    //&& Time.time > fNextShot
+    //&& !sBeeCollision.bIsDead)
+    //{
+    //    Shoot();
+    //}
+
+    //private void OnCollisionEnter2D(Collision2D p_cOther)
+    //{
+    //    if (p_cOther.gameObject.CompareTag("Platform"))
+    //    {
+    //        b_isTouchingPlatform = true;
+    //    }
+    //}
 }
