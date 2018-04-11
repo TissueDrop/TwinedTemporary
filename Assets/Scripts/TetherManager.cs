@@ -6,10 +6,10 @@ public class TetherManager : MonoBehaviour
 {
     public float fLinkDistance;
 
-    [HideInInspector]
+    //[HideInInspector]
     public List<GameObject> a_goTetherLinks;
 
-    public List<GameObject> TestList;
+    public List<GameObject> CopyList;
 
     private GameObject goPlayer1;
     private GameObject goPlayer2;
@@ -19,7 +19,7 @@ public class TetherManager : MonoBehaviour
 
     private float fLinkDiamater;
 
-    private int iLinkQuantity = 0;
+    public int iLinkQuantity = 0;
 
     // Use this for initialization
     void Start ()
@@ -35,18 +35,15 @@ public class TetherManager : MonoBehaviour
     // Update is called once per frame
     void Update ()
 	{
-        TetherRenderer();
-
         if (Input.GetKeyDown(KeyCode.E))
         {
-            TestList = SortList(a_goTetherLinks);
             RemoveLink();
         }
         if (Input.GetKeyDown(KeyCode.R))
 	    {
             CreateLink(1);
 	    }
-
+        TetherRenderer();
     }
 
     int LinkCountIsEven;
@@ -144,9 +141,10 @@ public class TetherManager : MonoBehaviour
         // Cannot be smaller otherwise we will go out of range in the TetherLink
         if (a_goTetherLinks.Count > 2)
         {
-            if (a_goTetherLinks[a_goTetherLinks.Count / 2] != null)
+            if (/*SortList(CopyList)[a_goTetherLinks.Count / 2] != null*/true)
             {
-                a_goTetherLinks[a_goTetherLinks.Count / 2].GetComponent<TetherLink>().StartTetherLinkDownScaler();
+                //SortList(a_goTetherLinks)[a_goTetherLinks.Count / 2].GetComponent<TetherLink>().StartTetherLinkDownScaler();
+                //a_goTetherLinks[a_goTetherLinks.Count / 2].GetComponent<TetherLink>().StartTetherLinkDownScaler();
             }
             
         }
@@ -156,17 +154,25 @@ public class TetherManager : MonoBehaviour
 
     void TetherRenderer()
     {
+        CopyList = a_goTetherLinks;
+        SortList(CopyList);
+
         lrLineRenderer.positionCount = iLinkQuantity+2;
-        int i = 0;
-
-        lrLineRenderer.SetPosition(i, goPlayer1.transform.position);
-
-        for (i = 1; i < a_goTetherLinks.Count +1; i++)
+        if(CopyList.Count == a_goTetherLinks.Count)
         {
-            lrLineRenderer.SetPosition(i, a_goTetherLinks[i - 1].transform.position);
+            int i = 0;
+
+            lrLineRenderer.SetPosition(i, goPlayer1.transform.position);
+
+            for (i = 1; i < a_goTetherLinks.Count + 1; i++)
+            {
+                //lrLineRenderer.SetPosition(i, a_goTetherLinks[i - 1].transform.position);
+                lrLineRenderer.SetPosition(i, CopyList[i - 1].transform.position);
+            }
+
+            lrLineRenderer.SetPosition(i, goPlayer2.transform.position);
         }
-       
-        lrLineRenderer.SetPosition(i, goPlayer2.transform.position);
+        
     }
 
     void TetherGenerator()
@@ -182,7 +188,23 @@ public class TetherManager : MonoBehaviour
 
     public List<GameObject> SortList(List<GameObject> p_a_goUnsortedList)
     {
-        return p_a_goUnsortedList;
+        List<GameObject> TempSortList = new List<GameObject>();
+        List<GameObject> temp = p_a_goUnsortedList;
+        foreach (GameObject obj in p_a_goUnsortedList)
+        {
+            for (int i = 0; i < p_a_goUnsortedList.Count - 1; i++)
+            {
+                if (Vector2.Distance(goPlayer1.transform.position, temp[i].transform.position) < Vector2.Distance(goPlayer1.transform.position, temp[i + 1].transform.position))
+                {
+                    GameObject tmp = temp[i];
+                    temp[i] = temp[i + 1];
+                    temp[i + 1] = tmp;
+                }
+            }
+        }
+        TempSortList = temp;
+        TempSortList.Reverse();
+        return TempSortList;
     }
 
 
@@ -193,6 +215,10 @@ public class TetherManager : MonoBehaviour
     public void SetLinkList(List<GameObject> p_a_goLinkList)
     {
         a_goTetherLinks = p_a_goLinkList;
-        iLinkQuantity--;
+        
+    }
+    public void SetLinkQuantity(int p_ivalue)
+    {
+        iLinkQuantity += p_ivalue;
     }
 }
